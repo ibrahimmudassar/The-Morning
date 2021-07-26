@@ -1,0 +1,8 @@
+datetime
+selenium
+discord_webhook
+pytz
+environs
+metadata_parser
+colorthief
+requests

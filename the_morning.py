@@ -1,0 +1,111 @@
+from datetime import datetime  # For time
+
+import metadata_parser  # For Opengraph
+import pytz  # Timezone
+import requests  # Download image link
+import io # For ColorThief raw file 
+from colorthief import ColorThief  # Find the dominant color
+from discord_webhook import DiscordEmbed, DiscordWebhook  # Connect to discord
+from environs import Env  # For environment variables
+from selenium import webdriver  # Browser prereq
+
+# Setting up environment variables
+env = Env()
+env.read_env()  # read .env file, if it exists
+
+
+# I use opengraph to simplify the collection process
+def embed_to_discord(nyt_link):
+    # Webhooks to send to
+    webhook = DiscordWebhook(url=env.list("WEBHOOKS"))
+
+    # Getting Opengraph data
+    og_page = metadata_parser.MetadataParser(
+        search_head_only=False, url=nyt_link)
+    data = og_page.metadata["meta"]
+
+    # create embed object for webhook
+    embed = DiscordEmbed(title=data["og:title"], description=data["og:description"],
+                         color=dominant_image_color(data["og:image"]))
+
+    # Mentioning the link to the article
+    embed.add_embed_field(name="Link", value=nyt_link, inline=False)
+
+    # Captioning the image
+    embed.add_embed_field(
+        name="Caption", value=data["og:image:alt"], inline=False)
+
+    # Author
+    embed.set_author(name=data["byl"])
+
+    # set image
+    embed.set_image(url=data["og:image"])
+
+    # set thumbnail
+    embed.set_thumbnail(
+        url='https://static01.nyt.com/images/2020/05/04/pageoneplus/04morning-icon/04morning-icon-mobileMasterAt3x.png')
+
+    # set footer
+    embed.set_footer(text='The Morning Newsletter')
+
+    # set timestamp (needs unix int)
+    nyt_date = browser.find_element_by_tag_name(
+        "time").get_attribute("datetime")  # get the unix time
+    # converts to datetime object
+    date = datetime.strptime(nyt_date, "%Y-%m-%dT%H:%M:%S%z")
+    time_as_int = (date - pytz.utc.localize(datetime(1970, 1, 1))
+                   ).total_seconds()  # converts to unix int
+    embed.set_timestamp(time_as_int)
+
+    # add embed object to webhook(s)
+    webhook.add_embed(embed)
+    webhook.execute()
+
+# A simple message
+def send_to_discord(message):
+    webhook = DiscordWebhook(url=env.list("WEBHOOKS"), content=message)
+    webhook.execute()
+
+# Takes the image link, downloads it, and then returns a hex color code of the most dominant color
+def dominant_image_color(image_link):
+    r = requests.get(image_link, allow_redirects=True)
+
+    color_thief = ColorThief(io.BytesIO(r.content))
+    dominant_color = color_thief.get_color(quality=10)
+    hex = '%02x%02x%02x' % dominant_color
+    return hex
+
+
+# Create new Instance of Chrome
+chrome_options = webdriver.ChromeOptions()
+chrome_options.binary_location = env("GOOGLE_CHROME_BIN")
+chrome_options.add_argument("--headless")
+chrome_options.add_argument("--disable-dev-shm-usage")
+chrome_options.add_argument("--no-sandbox")
+
+browser = webdriver.Chrome(executable_path=env(
+    'CHROMEDRIVER_PATH'), options=chrome_options)
+browser.get("https://www.nytimes.com/series/us-morning-briefing")
+
+
+# This function matches today's date to the newest article's date to determine
+# if there is a newsletter for today
+elems = browser.find_elements_by_tag_name('a')
+there_is_a_newsletter_today = False
+today = pytz.timezone(
+    'US/Eastern').localize(datetime.now()).strftime("%Y/%m/%d")
+
+for elem in elems:
+    if "https://www.nytimes.com/" + today in elem.get_attribute('href'):
+        there_is_a_newsletter_today = True
+        briefing_link = elem.get_attribute('href')
+
+if there_is_a_newsletter_today:
+    browser.get(briefing_link)
+
+    embed_to_discord(briefing_link)
+
+else:
+    send_to_discord("There is no Morning Newsletter today :(")
+
+browser.quit()
