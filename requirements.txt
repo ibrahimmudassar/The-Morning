@@ -6,4 +6,3 @@ environs
 metadata_parser
 colorthief
 requests
-json
