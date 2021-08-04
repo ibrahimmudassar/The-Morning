@@ -6,8 +6,9 @@ Scrapes using selenium and deployed using Heroku.
 
 #### Warning!
 This code is not going to work unless you define a couple environment variables. This can be done a couple of ways:
-    - Control Panel > Adcanced System Settings > Advanced > Environment Variables
-    - Create a .env file in the folder and define the required environment variables there
+
+Control Panel > Adcanced System Settings > Advanced > Environment Variables
+Create a .env file in the folder and define the required environment variables there
 
 If you are using discord embeds you will need to define a WEBHOOKS variable as such:
 WEBHOOKS=exampleapi.discord.com,exampleapi.discord.com
