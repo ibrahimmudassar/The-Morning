@@ -4,8 +4,10 @@ I wanted to create a bot that would automatically send me The Morning Newsletter
 
 Scrapes using selenium and deployed using Heroku.
 
-uses build packages in Heroku so the chromedriver is not added.
-
 #### Warning!
-This code is not going to work unless you define a WEBHOOKS env variable. The value will look like so (including the quotes and brackets:
-    ["URL HERE", "URL HERE"]
+This code is not going to work unless you define a couple environment variables. This can be done a couple of ways:
+    - Control Panel > Adcanced System Settings > Advanced > Environment Variables
+    - Create a .env file in the folder and define the required environment variables there
+
+If you are using discord embeds you will need to define a WEBHOOKS variable as such:
+WEBHOOKS=exampleapi.discord.com,exampleapi.discord.com
