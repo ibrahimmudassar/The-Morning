@@ -4,6 +4,8 @@ I wanted to create a bot that would automatically send me The Morning Newsletter
 
 Scrapes using selenium and deployed using Heroku.
 
+This code works with Restful APIs as well, just comment out the discord specific function.
+
 #### Warning!
 This code is not going to work unless you define a couple environment variables. This can be done a couple of ways:
 
