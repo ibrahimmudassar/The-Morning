@@ -8,6 +8,7 @@ from colorthief import ColorThief  # Find the dominant color
 from discord_webhook import DiscordEmbed, DiscordWebhook  # Connect to discord
 from environs import Env  # For environment variables
 from selenium import webdriver  # Browser prereq
+import json
 
 # Setting up environment variables
 env = Env()
@@ -15,14 +16,9 @@ env.read_env()  # read .env file, if it exists
 
 
 # I use opengraph to simplify the collection process
-def embed_to_discord(nyt_link):
+def embed_to_discord(data, nyt_link):
     # Webhooks to send to
     webhook = DiscordWebhook(url=env.list("WEBHOOKS"))
-
-    # Getting Opengraph data
-    og_page = metadata_parser.MetadataParser(
-        search_head_only=False, url=nyt_link)
-    data = og_page.metadata["meta"]
 
     # create embed object for webhook
     embed = DiscordEmbed(title=data["og:title"], description=data["og:description"],
@@ -66,6 +62,17 @@ def send_to_discord(message):
     webhook = DiscordWebhook(url=env.list("WEBHOOKS"), content=message)
     webhook.execute()
 
+def restful_send(notification):
+    body = json.dumps({
+
+    "notification": notification,
+
+    "accessCode": env("ACCESS_CODE")
+
+    })
+
+    requests.post(url = "https://api.notifymyecho.com/v1/NotifyMe", data = body)
+
 # Takes the image link, downloads it, and then returns a hex color code of the most dominant color
 def dominant_image_color(image_link):
     r = requests.get(image_link, allow_redirects=True)
@@ -103,9 +110,18 @@ for elem in elems:
 if there_is_a_newsletter_today:
     browser.get(briefing_link)
 
-    embed_to_discord(briefing_link)
+    # Getting Opengraph data
+    og_page = metadata_parser.MetadataParser(
+        search_head_only=False, url=briefing_link)
+    data = og_page.metadata["meta"]
+
+    embed_to_discord(data, briefing_link)
+
+
+    restful_send("The Morning Newsletter - ${data['og:description']}")
 
 else:
     send_to_discord("There is no Morning Newsletter today :(")
+    restful_send("There is no Morning Newsletter today")
 
 browser.quit()
