@@ -118,7 +118,7 @@ if there_is_a_newsletter_today:
     embed_to_discord(data, briefing_link)
 
 
-    restful_send("The Morning Newsletter - ${data['og:description']}")
+    restful_send("${data['og:description']}")
 
 else:
     send_to_discord("There is no Morning Newsletter today :(")
