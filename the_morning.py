@@ -28,14 +28,17 @@ def embed_to_discord(data, nyt_link):
     embed.add_embed_field(name="Link", value=nyt_link, inline=False)
 
     # Captioning the image
-    embed.add_embed_field(
+    if no_entry_mitigator(data["og:image:alt"]):
+        embed.add_embed_field(
         name="Caption", value=data["og:image:alt"], inline=False)
 
     # Author
-    embed.set_author(name=data["byl"])
-
+    if no_entry_mitigator(data["byl"]):
+        embed.set_author(name=data["byl"])
+    
     # set image
-    embed.set_image(url=data["og:image"])
+    if no_entry_mitigator(data["og:image"]):
+        embed.set_image(url=data["og:image"])
 
     # set thumbnail
     embed.set_thumbnail(
@@ -72,6 +75,13 @@ def restful_send(notification):
     })
 
     requests.post(url = "https://api.notifymyecho.com/v1/NotifyMe", data = body)
+
+#checks to see if the entry is of length 0, and if it is, returns an empty string
+#this makes it fail proof and will still let the embed on discord without causing problems
+def no_entry_mitigator(x):
+    if len(x) == 0:
+        return False
+    return True
 
 # Takes the image link, downloads it, and then returns a hex color code of the most dominant color
 def dominant_image_color(image_link):
@@ -118,7 +128,7 @@ if there_is_a_newsletter_today:
     embed_to_discord(data, briefing_link)
 
 
-    restful_send("${data['og:description']}")
+    restful_send("The Morning Newsletter")
 
 else:
     send_to_discord("There is no Morning Newsletter today :(")
