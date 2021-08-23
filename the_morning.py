@@ -25,7 +25,7 @@ def embed_to_discord(data, nyt_link):
                          color=dominant_image_color(data["og:image"]))
 
     # Mentioning the link to the article
-    embed.add_embed_field(name="Link", value=nyt_link, inline=False)
+    embed.add_embed_field(name="Link", value= " [Link to The Morning Newsletter](" + nyt_link + ")", inline=False)
 
     # Captioning the image
     if no_entry_mitigator(data["og:image:alt"]):
