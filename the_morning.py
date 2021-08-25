@@ -25,7 +25,7 @@ def embed_to_discord(data, nyt_link):
                          color=dominant_image_color(data["og:image"]))
 
     # Mentioning the link to the article
-    embed.add_embed_field(name="Link", value= " [Link to The Morning Newsletter](" + nyt_link + ")", inline=False)
+    embed.add_embed_field(name="Link", value= " [Read Full Article Here](" + nyt_link + ")", inline=False)
 
     # Captioning the image
     if no_entry_mitigator(data["og:image:alt"]):
@@ -88,7 +88,7 @@ def dominant_image_color(image_link):
     r = requests.get(image_link, allow_redirects=True)
 
     color_thief = ColorThief(io.BytesIO(r.content))
-    dominant_color = color_thief.get_color(quality=10)
+    dominant_color = color_thief.get_color(quality=3)
     hex = '%02x%02x%02x' % dominant_color
     return hex
 
