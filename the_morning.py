@@ -9,10 +9,16 @@ from discord_webhook import DiscordEmbed, DiscordWebhook  # Connect to discord
 from environs import Env  # For environment variables
 from selenium import webdriver  # Browser prereq
 import json
+import psycopg2
 
 # Setting up environment variables
 env = Env()
 env.read_env()  # read .env file, if it exists
+
+#Connecting with the heroku database
+DATABASE_URL = env['DATABASE_URL']
+
+conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
 
 # I use opengraph to simplify the collection process
@@ -128,7 +134,7 @@ if there_is_a_newsletter_today:
     embed_to_discord(data, briefing_link)
 
 
-    restful_send("The Morning Newsletter")
+    restful_send("The Morning Newsletter" + data["og:title"])
 
 else:
     send_to_discord("There is no Morning Newsletter today :(")
