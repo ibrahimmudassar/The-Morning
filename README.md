@@ -1,6 +1,6 @@
 # The-Morning
 
-![Embed Example](https://cdn.discordapp.com/attachments/869978627649974273/879279803159679006/unknown.png) <br />
+![Embed Example](https://cdn.discordapp.com/attachments/749403737730187328/881721980972306513/unknown.png) <br />
 I wanted to create a bot that would automatically send me The Morning Newsletter from The New York Times to my Discord Server.
 
 Scrapes using selenium and deployed using Heroku.
