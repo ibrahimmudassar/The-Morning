@@ -16,7 +16,7 @@ env = Env()
 env.read_env()  # read .env file, if it exists
 
 #Connecting with the heroku database
-DATABASE_URL = env['DATABASE_URL']
+DATABASE_URL = env('DATABASE_URL')
 
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
@@ -134,7 +134,7 @@ if there_is_a_newsletter_today:
     embed_to_discord(data, briefing_link)
 
 
-    restful_send("The Morning Newsletter" + data["og:title"])
+    restful_send("The Morning Newsletter," + data["og:title"])
 
 else:
     send_to_discord("There is no Morning Newsletter today :(")
