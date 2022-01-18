@@ -1,21 +1,23 @@
+import io  # For ColorThief raw file
+import json
 from datetime import datetime  # For time
 
 import metadata_parser  # For Opengraph
+import psycopg2  # Heroku Database
 import pytz  # Timezone
 import requests  # Download image link
-import io # For ColorThief raw file 
 from colorthief import ColorThief  # Find the dominant color
 from discord_webhook import DiscordEmbed, DiscordWebhook  # Connect to discord
 from environs import Env  # For environment variables
 from selenium import webdriver  # Browser prereq
-import json
-import psycopg2
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
 
 # Setting up environment variables
 env = Env()
 env.read_env()  # read .env file, if it exists
 
-#Connecting with the heroku database
+# Connecting with the heroku database
 DATABASE_URL = env('DATABASE_URL')
 
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -31,17 +33,18 @@ def embed_to_discord(data, nyt_link):
                          color=dominant_image_color(data["og:image"]))
 
     # Mentioning the link to the article
-    embed.add_embed_field(name="Link", value= " [Read Full Article Here](" + nyt_link + ")", inline=False)
+    embed.add_embed_field(
+        name="Link", value=" [Read Full Article Here](" + nyt_link + ")", inline=False)
 
     # Captioning the image
     if no_entry_mitigator(data["og:image:alt"]):
         embed.add_embed_field(
-        name="Caption", value=data["og:image:alt"], inline=False)
+            name="Caption", value=data["og:image:alt"], inline=False)
 
     # Author
     if no_entry_mitigator(data["byl"]):
         embed.set_author(name=data["byl"])
-    
+
     # set image
     if no_entry_mitigator(data["og:image"]):
         embed.set_image(url=data["og:image"])
@@ -67,29 +70,36 @@ def embed_to_discord(data, nyt_link):
     webhook.execute()
 
 # A simple message
+
+
 def send_to_discord(message):
     webhook = DiscordWebhook(url=env.list("WEBHOOKS"), content=message)
     webhook.execute()
 
+
 def restful_send(notification):
     body = json.dumps({
 
-    "notification": notification,
+        "notification": notification,
 
-    "accessCode": env("ACCESS_CODE")
+        "accessCode": env("ACCESS_CODE")
 
     })
 
-    requests.post(url = "https://api.notifymyecho.com/v1/NotifyMe", data = body)
+    requests.post(url="https://api.notifymyecho.com/v1/NotifyMe", data=body)
 
-#checks to see if the entry is of length 0, and if it is, returns an empty string
-#this makes it fail proof and will still let the embed on discord without causing problems
+# checks to see if the entry is of length 0, and if it is, returns an empty string
+# this makes it fail proof and will still let the embed on discord without causing problems
+
+
 def no_entry_mitigator(x):
     if len(x) == 0:
         return False
     return True
 
 # Takes the image link, downloads it, and then returns a hex color code of the most dominant color
+
+
 def dominant_image_color(image_link):
     r = requests.get(image_link, allow_redirects=True)
 
@@ -100,20 +110,20 @@ def dominant_image_color(image_link):
 
 
 # Create new Instance of Chrome
-chrome_options = webdriver.ChromeOptions()
-chrome_options.binary_location = env("GOOGLE_CHROME_BIN")
-chrome_options.add_argument("--headless")
-chrome_options.add_argument("--disable-dev-shm-usage")
-chrome_options.add_argument("--no-sandbox")
+options = webdriver.ChromeOptions()
+options.binary_location = env("GOOGLE_CHROME_BIN")
+options.add_argument("--headless")
+options.add_argument("--disable-dev-shm-usage")
+options.add_argument("--no-sandbox")
 
-browser = webdriver.Chrome(executable_path=env(
-    'CHROMEDRIVER_PATH'), options=chrome_options)
+browser = webdriver.Chrome(service=Service(env(
+    'CHROMEDRIVER_PATH')), options=options)
 browser.get("https://www.nytimes.com/series/us-morning-briefing")
 
 
 # This function matches today's date to the newest article's date to determine
 # if there is a newsletter for today
-elems = browser.find_elements_by_tag_name('a')
+elems = browser.find_elements(By.TAG_NAME, 'a')
 there_is_a_newsletter_today = False
 today = pytz.timezone(
     'US/Eastern').localize(datetime.now()).strftime("%Y/%m/%d")
@@ -133,11 +143,10 @@ if there_is_a_newsletter_today:
 
     embed_to_discord(data, briefing_link)
 
-
     restful_send("The Morning Newsletter," + data["og:title"])
 
 else:
-    send_to_discord("There is no Morning Newsletter today :(")
+    send_to_discord("There is no Morning Newsletter today :sob:")
     restful_send("There is no Morning Newsletter today")
 
 browser.quit()
