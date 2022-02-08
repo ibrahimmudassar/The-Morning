@@ -1,5 +1,5 @@
 datetime
-selenium>=4.1.2
+selenium>=4.1
 discord_webhook
 pytz
 environs
