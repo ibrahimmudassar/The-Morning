@@ -57,8 +57,8 @@ def embed_to_discord(data, nyt_link):
     embed.set_footer(text='The Morning Newsletter')
 
     # set timestamp (needs unix int)
-    nyt_date = browser.find_element_by_tag_name(
-        "time").get_attribute("datetime")  # get the unix time
+    nyt_date = browser.find_element(By.TAG_NAME, "time").get_attribute(
+        "datetime")  # get the unix time
     # converts to datetime object
     date = datetime.strptime(nyt_date, "%Y-%m-%dT%H:%M:%S%z")
     time_as_int = (date - pytz.utc.localize(datetime(1970, 1, 1))
@@ -125,8 +125,10 @@ browser.get("https://www.nytimes.com/series/us-morning-briefing")
 # if there is a newsletter for today
 elems = browser.find_elements(By.TAG_NAME, 'a')
 there_is_a_newsletter_today = False
+# today = pytz.timezone(
+#     'US/Eastern').localize(datetime.now()).strftime("%Y/%m/%d")
 today = pytz.timezone(
-    'US/Eastern').localize(datetime.now()).strftime("%Y/%m/%d")
+    'US/Eastern').localize(datetime(2022, 1, 28)).strftime("%Y/%m/%d")
 
 for elem in elems:
     if "https://www.nytimes.com/" + today in elem.get_attribute('href'):
