@@ -125,10 +125,8 @@ browser.get("https://www.nytimes.com/series/us-morning-briefing")
 # if there is a newsletter for today
 elems = browser.find_elements(By.TAG_NAME, 'a')
 there_is_a_newsletter_today = False
-# today = pytz.timezone(
-#     'US/Eastern').localize(datetime.now()).strftime("%Y/%m/%d")
 today = pytz.timezone(
-    'US/Eastern').localize(datetime(2022, 1, 28)).strftime("%Y/%m/%d")
+    'US/Eastern').localize(datetime.now()).strftime("%Y/%m/%d")
 
 for elem in elems:
     if "https://www.nytimes.com/" + today in elem.get_attribute('href'):
