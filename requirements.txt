@@ -7,3 +7,4 @@ metadata_parser
 colorthief
 requests
 psycopg2
+psycopg2-binary
