@@ -3,7 +3,7 @@ import json
 from datetime import datetime  # For time
 
 import metadata_parser  # For Opengraph
-import psycopg2  # Heroku Database
+# import psycopg2  # Heroku Database
 import pytz  # Timezone
 import requests  # Download image link
 from colorthief import ColorThief  # Find the dominant color
@@ -12,15 +12,16 @@ from environs import Env  # For environment variables
 from selenium import webdriver  # Browser prereq
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
 
 # Setting up environment variables
 env = Env()
 env.read_env()  # read .env file, if it exists
 
 # Connecting with the heroku database
-DATABASE_URL = env('DATABASE_URL')
+#DATABASE_URL = env('DATABASE_URL')
 
-conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+#conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
 
 # I use opengraph to simplify the collection process
@@ -116,8 +117,8 @@ options.add_argument("--headless")
 options.add_argument("--disable-dev-shm-usage")
 options.add_argument("--no-sandbox")
 
-browser = webdriver.Chrome(service=Service(env(
-    'CHROMEDRIVER_PATH')), options=options)
+browser = webdriver.Chrome(service=Service(
+    ChromeDriverManager().install()), options=options)
 browser.get("https://www.nytimes.com/series/us-morning-briefing")
 
 
@@ -127,6 +128,7 @@ elems = browser.find_elements(By.TAG_NAME, 'a')
 there_is_a_newsletter_today = False
 today = pytz.timezone(
     'US/Eastern').localize(datetime.now()).strftime("%Y/%m/%d")
+briefing_link = ""
 
 for elem in elems:
     if "https://www.nytimes.com/" + today in elem.get_attribute('href'):
@@ -143,10 +145,10 @@ if there_is_a_newsletter_today:
 
     embed_to_discord(data, briefing_link)
 
-    restful_send("The Morning Newsletter," + data["og:title"])
+    #   restful_send("The Morning Newsletter," + data["og:title"])
 
 else:
     send_to_discord("There is no Morning Newsletter today :sob:")
-    restful_send("There is no Morning Newsletter today")
+    #restful_send("There is no Morning Newsletter today")
 
 browser.quit()
