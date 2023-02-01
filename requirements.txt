@@ -9,3 +9,4 @@ requests
 psycopg2
 psycopg2-binary
 webdriver-manager
+chromedriver_binary
