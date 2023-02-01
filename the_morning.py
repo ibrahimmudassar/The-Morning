@@ -13,6 +13,7 @@ from selenium import webdriver  # Browser prereq
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
+import chromedriver_binary  # Adds chromedriver binary to path
 
 # Setting up environment variables
 env = Env()
@@ -112,7 +113,7 @@ def dominant_image_color(image_link):
 
 # Create new Instance of Chrome
 options = webdriver.ChromeOptions()
-options.binary_location = env("GOOGLE_CHROME_BIN")
+#options.binary_location = env("GOOGLE_CHROME_BIN")
 options.add_argument("--headless")
 options.add_argument("--disable-dev-shm-usage")
 options.add_argument("--no-sandbox")
