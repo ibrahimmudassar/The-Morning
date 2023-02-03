@@ -2,24 +2,20 @@ import io  # For ColorThief raw file
 import json
 from datetime import datetime  # For time
 
-import metadata_parser  # For Opengraph
-# import psycopg2  # Heroku Database
+import chromedriver_autoinstaller
 import pytz  # Timezone
 import requests  # Download image link
 from colorthief import ColorThief  # Find the dominant color
 from discord_webhook import DiscordEmbed, DiscordWebhook  # Connect to discord
 from environs import Env  # For environment variables
-from selenium import webdriver  # Browser prereq
-from selenium.webdriver.chrome.service import Service
+from selenium import webdriver
 from selenium.webdriver.common.by import By
-from webdriver_manager.chrome import ChromeDriverManager
-import chromedriver_binary  # Adds chromedriver binary to path
 
 # Setting up environment variables
 env = Env()
 env.read_env()  # read .env file, if it exists
 
-# Connecting with the heroku database
+# Connecting with the database (originally this was meant so I could run every 5 minutes for real time posting)
 #DATABASE_URL = env('DATABASE_URL')
 
 #conn = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -111,17 +107,19 @@ def dominant_image_color(image_link):
     return hex
 
 
+# Check if the current version of chromedriver exists
+chromedriver_autoinstaller.install()
+# and if it doesn't exist, download it automatically,
+# then add chromedriver to path
+
 # Create new Instance of Chrome
 options = webdriver.ChromeOptions()
-#options.binary_location = env("GOOGLE_CHROME_BIN")
 options.add_argument("--headless")
 options.add_argument("--disable-dev-shm-usage")
 options.add_argument("--no-sandbox")
 
-browser = webdriver.Chrome(service=Service(
-    ChromeDriverManager().install()), options=options)
+browser = webdriver.Chrome(options=options)
 browser.get("https://www.nytimes.com/series/us-morning-briefing")
-
 
 # This function matches today's date to the newest article's date to determine
 # if there is a newsletter for today
@@ -135,18 +133,29 @@ for elem in elems:
     if "https://www.nytimes.com/" + today in elem.get_attribute('href'):
         there_is_a_newsletter_today = True
         briefing_link = elem.get_attribute('href')
+        break
 
 if there_is_a_newsletter_today:
     browser.get(briefing_link)
 
-    # Getting Opengraph data
-    og_page = metadata_parser.MetadataParser(
-        search_head_only=False, url=briefing_link)
-    data = og_page.metadata["meta"]
+    metas = browser.find_elements(By.TAG_NAME, "meta")
+
+    data = {}
+    for meta in metas:
+        key = meta.get_attribute("property")
+        value = meta.get_attribute("content")
+
+        data[key] = value
+
+    for meta in metas:
+        key = meta.get_attribute("name")
+        value = meta.get_attribute("content")
+
+        data[key] = value
 
     embed_to_discord(data, briefing_link)
 
-    #   restful_send("The Morning Newsletter," + data["og:title"])
+    #restful_send("The Morning Newsletter," + data["og:title"])
 
 else:
     send_to_discord("There is no Morning Newsletter today :sob:")
