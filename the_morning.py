@@ -133,7 +133,7 @@ briefing_link = ""
 for elem in elems:
     if ("https://www.nytimes.com/" + today) in elem:
         there_is_a_newsletter_today = True
-        briefing_link = elem.get_attribute('href')
+        briefing_link = elem
         break
 
 if there_is_a_newsletter_today:
