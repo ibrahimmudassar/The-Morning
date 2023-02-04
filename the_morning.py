@@ -124,13 +124,14 @@ browser.get("https://www.nytimes.com/series/us-morning-briefing")
 # This function matches today's date to the newest article's date to determine
 # if there is a newsletter for today
 elems = browser.find_elements(By.TAG_NAME, 'a')
+elems = [elem.get_attribute('href') for elem in elems if elem.get_attribute('href') is not None]
 there_is_a_newsletter_today = False
 today = pytz.timezone(
     'US/Eastern').localize(datetime.now()).strftime("%Y/%m/%d")
 briefing_link = ""
 
 for elem in elems:
-    if (elem is not None) and (("https://www.nytimes.com/" + today) in elem.get_attribute('href')):
+    if ("https://www.nytimes.com/" + today) in elem:
         there_is_a_newsletter_today = True
         briefing_link = elem.get_attribute('href')
         break
