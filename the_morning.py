@@ -130,7 +130,7 @@ today = pytz.timezone(
 briefing_link = ""
 
 for elem in elems:
-    if (elem is not None) && (("https://www.nytimes.com/" + today) in elem.get_attribute('href')):
+    if (elem is not None) and (("https://www.nytimes.com/" + today) in elem.get_attribute('href')):
         there_is_a_newsletter_today = True
         briefing_link = elem.get_attribute('href')
         break
