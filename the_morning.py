@@ -23,10 +23,6 @@ env.read_env()  # read .env file, if it exists
 
 # I use opengraph to simplify the collection process
 def embed_to_discord(data, nyt_link):
-    # Webhooks to send to
-    webhook = DiscordWebhook(url=env("WEBHOOKS"))
-    for i in env.list("WEBHOOKS"):
-        print(type(i))
 
     # create embed object for webhook
     embed = DiscordEmbed(title=data["og:title"], description=data["og:description"],
@@ -66,8 +62,11 @@ def embed_to_discord(data, nyt_link):
     embed.set_timestamp(time_as_int)
 
     # add embed object to webhook(s)
-    webhook.add_embed(embed)
-    webhook.execute()
+    # Webhooks to send to
+    for webhook_url in env.list("WEBHOOKS"):
+        webhook = DiscordWebhook(url=webhook_url)
+        webhook.add_embed(embed)
+        webhook.execute()
 
 # A simple message
 
