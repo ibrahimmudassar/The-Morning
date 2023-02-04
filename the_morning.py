@@ -25,6 +25,8 @@ env.read_env()  # read .env file, if it exists
 def embed_to_discord(data, nyt_link):
     # Webhooks to send to
     webhook = DiscordWebhook(url=env.list("WEBHOOKS"))
+    for i in env.list("WEBHOOKS"):
+        print(type(i))
 
     # create embed object for webhook
     embed = DiscordEmbed(title=data["og:title"], description=data["og:description"],
