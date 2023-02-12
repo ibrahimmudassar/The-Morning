@@ -16,9 +16,9 @@ env = Env()
 env.read_env()  # read .env file, if it exists
 
 # Connecting with the database (originally this was meant so I could run every 5 minutes for real time posting)
-#DATABASE_URL = env('DATABASE_URL')
+# DATABASE_URL = env('DATABASE_URL')
 
-#conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+# conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
 
 # I use opengraph to simplify the collection process
@@ -72,8 +72,9 @@ def embed_to_discord(data, nyt_link):
 
 
 def send_to_discord(message):
-    webhook = DiscordWebhook(url=env.list("WEBHOOKS"), content=message)
-    webhook.execute()
+    for webhook_url in env.list("WEBHOOKS"):
+        webhook = DiscordWebhook(url=webhook_url, content=message)
+        webhook.execute()
 
 
 def restful_send(notification):
@@ -125,7 +126,8 @@ browser.get("https://www.nytimes.com/series/us-morning-briefing")
 # This function matches today's date to the newest article's date to determine
 # if there is a newsletter for today
 elems = browser.find_elements(By.TAG_NAME, 'a')
-elems = [elem.get_attribute('href') for elem in elems if elem.get_attribute('href') is not None]
+elems = [elem.get_attribute('href')
+         for elem in elems if elem.get_attribute('href') is not None]
 there_is_a_newsletter_today = False
 today = pytz.timezone(
     'US/Eastern').localize(datetime.now()).strftime("%Y/%m/%d")
@@ -157,10 +159,10 @@ if there_is_a_newsletter_today:
 
     embed_to_discord(data, briefing_link)
 
-    #restful_send("The Morning Newsletter," + data["og:title"])
+    # restful_send("The Morning Newsletter," + data["og:title"])
 
 else:
     send_to_discord("There is no Morning Newsletter today :sob:")
-    #restful_send("There is no Morning Newsletter today")
+    # restful_send("There is no Morning Newsletter today")
 
 browser.quit()
