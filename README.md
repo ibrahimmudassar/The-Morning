@@ -3,7 +3,7 @@
 ![Embed Example](https://cdn.discordapp.com/attachments/749403737730187328/881721980972306513/unknown.png) <br />
 I wanted to create a bot that would automatically send me The Morning Newsletter from The New York Times to my Discord Server.
 
-Scrapes using selenium and deployed using Heroku.
+Scrapes using selenium and deployed using GitHub Actions.
 
 This code works with Restful APIs as well, just comment out the discord specific function.
 
