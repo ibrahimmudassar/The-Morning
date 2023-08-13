@@ -2,14 +2,13 @@ import io  # For ColorThief raw file
 import json
 from datetime import datetime  # For time
 
-import chromedriver_autoinstaller
 import pytz  # Timezone
 import requests  # Download image link
 from colorthief import ColorThief  # Find the dominant color
 from discord_webhook import DiscordEmbed, DiscordWebhook  # Connect to discord
 from environs import Env  # For environment variables
-from selenium import webdriver
-from selenium.webdriver.common.by import By
+from requests_html import HTMLSession
+from waybackpy import WaybackMachineSaveAPI
 
 # Setting up environment variables
 env = Env()
@@ -18,10 +17,9 @@ env.read_env()  # read .env file, if it exists
 # Connecting with the database (originally this was meant so I could run every 5 minutes for real time posting)
 # DATABASE_URL = env('DATABASE_URL')
 
-# conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-
-
 # I use opengraph to simplify the collection process
+
+
 def embed_to_discord(data, nyt_link):
 
     # create embed object for webhook
@@ -29,8 +27,11 @@ def embed_to_discord(data, nyt_link):
                          color=dominant_image_color(data["og:image"]))
 
     # Mentioning the link to the article
+    # Adding archive link if you need to bypass paywall
+    user_agent = "Mozilla/5.0 (Windows NT 5.1; rv:40.0) Gecko/20100101 Firefox/40.0"
+    save_api = WaybackMachineSaveAPI(nyt_link, user_agent)
     embed.add_embed_field(
-        name="Link", value=" [Read Full Article Here](" + nyt_link + ")", inline=False)
+        name="Link", value=f"[Read Full Article Here]({nyt_link})\n[Archive Article Here]({save_api.save()})", inline=False)
 
     # Captioning the image
     if no_entry_mitigator(data["og:image:alt"]):
@@ -52,14 +53,9 @@ def embed_to_discord(data, nyt_link):
     # set footer
     embed.set_footer(text='The Morning Newsletter')
 
-    # set timestamp (needs unix int)
-    nyt_date = browser.find_element(By.TAG_NAME, "time").get_attribute(
-        "datetime")  # get the unix time
-    # converts to datetime object
-    date = datetime.strptime(nyt_date, "%Y-%m-%dT%H:%M:%S%z")
-    time_as_int = (date - pytz.utc.localize(datetime(1970, 1, 1))
-                   ).total_seconds()  # converts to unix int
-    embed.set_timestamp(time_as_int)
+    # set timestamp
+    embed.set_timestamp(datetime.fromisoformat(
+        data['article:published_time']))  # type: ignore
 
     # add embed object to webhook(s)
     # Webhooks to send to
@@ -109,53 +105,43 @@ def dominant_image_color(image_link):
     return hex
 
 
-# Check if the current version of chromedriver exists
-chromedriver_autoinstaller.install()
-# and if it doesn't exist, download it automatically,
-# then add chromedriver to path
+url = "https://www.nytimes.com/series/us-morning-briefing"
 
-# Create new Instance of Chrome
-options = webdriver.ChromeOptions()
-options.add_argument("--headless")
-options.add_argument("--disable-dev-shm-usage")
-options.add_argument("--no-sandbox")
+session = HTMLSession()
+r = session.get(url)
 
-browser = webdriver.Chrome(options=options)
-browser.get("https://www.nytimes.com/series/us-morning-briefing")
-
-# This function matches today's date to the newest article's date to determine
-# if there is a newsletter for today
-elems = browser.find_elements(By.TAG_NAME, 'a')
-elems = [elem.get_attribute('href')
-         for elem in elems if elem.get_attribute('href') is not None]
-there_is_a_newsletter_today = False
 today = pytz.timezone(
-    'US/Eastern').localize(datetime.now()).strftime("%Y/%m/%d")
-briefing_link = ""
+'US/Eastern').localize(datetime.now()).strftime("%Y/%m/%d")
 
-for elem in elems:
-    if ("https://www.nytimes.com/" + today) in elem:
+elems = r.html.find('a')  # type: ignore
+elems = [i.attrs['href'] for i in elems if 'href' in i.attrs]
+
+briefing_link = ""
+there_is_a_newsletter_today = False
+
+for href in elems:
+    if today in href:
+        briefing_link = f"https://www.nytimes.com/{href}"
         there_is_a_newsletter_today = True
-        briefing_link = elem
         break
 
 if there_is_a_newsletter_today:
-    browser.get(briefing_link)
-
-    metas = browser.find_elements(By.TAG_NAME, "meta")
+    r = session.get(briefing_link)
+    metas = r.html.find('meta')  # type: ignore
 
     data = {}
     for meta in metas:
-        key = meta.get_attribute("property")
-        value = meta.get_attribute("content")
+        if 'content' in meta.attrs:
+            key = ''
+            value = meta.attrs['content']
 
-        data[key] = value
+            #one or the other should be there
+            if 'property' in meta.attrs:
+                key = meta.attrs['property']
+            if 'name' in meta.attrs:
+                key = meta.attrs['name']
 
-    for meta in metas:
-        key = meta.get_attribute("name")
-        value = meta.get_attribute("content")
-
-        data[key] = value
+            data[key] = value
 
     embed_to_discord(data, briefing_link)
 
@@ -164,5 +150,3 @@ if there_is_a_newsletter_today:
 else:
     send_to_discord("There is no Morning Newsletter today :sob:")
     # restful_send("There is no Morning Newsletter today")
-
-browser.quit()

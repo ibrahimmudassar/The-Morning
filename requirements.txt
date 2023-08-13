@@ -1,10 +1,7 @@
-datetime
-selenium>=4.1
-discord_webhook
-pytz
-environs
-metadata_parser
 colorthief
-requests
-chromedriver_binary
-chromedriver-autoinstaller
+discord_webhook
+environs
+pytz
+Requests
+requests_html
+waybackpy
