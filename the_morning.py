@@ -8,7 +8,7 @@ from colorthief import ColorThief  # Find the dominant color
 from discord_webhook import DiscordEmbed, DiscordWebhook  # Connect to discord
 from environs import Env  # For environment variables
 from requests_html import HTMLSession
-from waybackpy import WaybackMachineSaveAPI
+from waybackpy import WaybackMachineSaveAPI, WaybackMachineCDXServerAPI
 
 # Setting up environment variables
 env = Env()
@@ -30,8 +30,14 @@ def embed_to_discord(data, nyt_link):
     # Adding archive link if you need to bypass paywall
     user_agent = "Mozilla/5.0 (Windows NT 5.1; rv:40.0) Gecko/20100101 Firefox/40.0"
     save_api = WaybackMachineSaveAPI(nyt_link, user_agent)
+    cdx_api = WaybackMachineCDXServerAPI(nyt_link, user_agent)
+    archive_link = cdx_api.newest().archive_url
+    
+    if archive_link == '' or archive_link is None:
+        archive_link = save_api.save()
+    
     embed.add_embed_field(
-        name="Link", value=f"[Read Full Article Here]({nyt_link})\n[Archive Article Here]({save_api.save()})", inline=False)
+        name="Link", value=f"[Read Full Article Here]({nyt_link})\n[Archive Article Here]({archive_link})", inline=False)
 
     # Captioning the image
     if no_entry_mitigator(data["og:image:alt"]):
