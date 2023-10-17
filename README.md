@@ -1,9 +1,10 @@
 # The-Morning
 
-![Embed Example](https://cdn.discordapp.com/attachments/749403737730187328/881721980972306513/unknown.png) <br />
+![Embed Example](https://github.com/ibrahimmudassar/The-Morning/assets/22484328/d264bfe4-1cec-4f88-951d-03ed365d139b) <br />
+
 I wanted to create a bot that would automatically send me The Morning Newsletter from The New York Times to my Discord Server.
 
-Scrapes using selenium and deployed using GitHub Actions.
+Scrapes using requests_html and deployed using GitHub Actions.
 
 This code works with Restful APIs as well, just comment out the discord specific function.
 

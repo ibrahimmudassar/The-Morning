@@ -4,11 +4,13 @@ from datetime import datetime  # For time
 
 import pytz  # Timezone
 import requests  # Download image link
+from bs4 import BeautifulSoup
 from colorthief import ColorThief  # Find the dominant color
 from discord_webhook import DiscordEmbed, DiscordWebhook  # Connect to discord
 from environs import Env  # For environment variables
+from playwright.sync_api import sync_playwright
 from requests_html import HTMLSession
-from waybackpy import WaybackMachineSaveAPI, WaybackMachineCDXServerAPI
+from waybackpy import WaybackMachineCDXServerAPI, WaybackMachineSaveAPI
 
 # Setting up environment variables
 env = Env()
@@ -132,8 +134,16 @@ for href in elems:
         break
 
 if there_is_a_newsletter_today:
-    r = session.get(briefing_link)
-    metas = r.html.find('meta')  # type: ignore
+    #using playwright
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        page = browser.new_page()
+        page.goto(briefing_link)
+
+        soup = BeautifulSoup(page.content(), 'html.parser')
+        browser.close()
+    
+    metas = soup.find_all('meta')
 
     data = {}
     for meta in metas:
