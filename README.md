@@ -1,6 +1,6 @@
 # The-Morning
 
-![Embed Example](https://github.com/ibrahimmudassar/The-Morning/assets/22484328/d264bfe4-1cec-4f88-951d-03ed365d139b) <br />
+![Embed Example](https://github.com/ibrahimmudassar/The-Morning/assets/22484328/67dca18f-7c29-4f53-96b1-b3cc037953b1) <br />
 
 I wanted to create a bot that would automatically send me The Morning Newsletter from The New York Times to my Discord Server.
 
