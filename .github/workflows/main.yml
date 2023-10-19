@@ -15,7 +15,7 @@ jobs:
         run: npx playwright install --with-deps
         
       - name: Run playwright executable
-        run: playwright install
+        run: python -m playwright install
         
       - name: setup python
         uses: actions/setup-python@v4
