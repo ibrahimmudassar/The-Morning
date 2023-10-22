@@ -33,9 +33,11 @@ def embed_to_discord(data, nyt_link):
     user_agent = "Mozilla/5.0 (Windows NT 5.1; rv:40.0) Gecko/20100101 Firefox/40.0"
     save_api = WaybackMachineSaveAPI(nyt_link, user_agent)
     cdx_api = WaybackMachineCDXServerAPI(nyt_link, user_agent)
-    archive_link = cdx_api.newest().archive_url
-    
-    if archive_link == '' or archive_link is None:
+    archive_link = ''
+
+    try:
+        archive_link = cdx_api.newest().archive_url
+    except:
         archive_link = save_api.save()
     
     embed.add_embed_field(
