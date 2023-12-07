@@ -10,7 +10,6 @@ from discord_webhook import DiscordEmbed, DiscordWebhook  # Connect to discord
 from environs import Env  # For environment variables
 from playwright.sync_api import sync_playwright
 from requests_html import HTMLSession
-from waybackpy import WaybackMachineCDXServerAPI, WaybackMachineSaveAPI
 
 # Setting up environment variables
 env = Env()
@@ -27,21 +26,11 @@ def embed_to_discord(data, nyt_link):
     # create embed object for webhook
     embed = DiscordEmbed(title=data["og:title"], description=data["og:description"],
                          color=dominant_image_color(data["og:image"]))
-
-    # Mentioning the link to the article
-    # Adding archive link if you need to bypass paywall
-    user_agent = "Mozilla/5.0 (Windows NT 5.1; rv:40.0) Gecko/20100101 Firefox/40.0"
-    save_api = WaybackMachineSaveAPI(nyt_link, user_agent)
-    cdx_api = WaybackMachineCDXServerAPI(nyt_link, user_agent)
-    archive_link = ''
-
-    try:
-        archive_link = cdx_api.newest().archive_url
-    except:
-        archive_link = save_api.save()
+    
+    bypass_link = f'https://1ft.io/proxy?q={nyt_link}'
     
     embed.add_embed_field(
-        name="Link", value=f"[Read Full Article Here]({nyt_link})\n[Archive Article Here]({archive_link})", inline=False)
+        name="Link", value=f"[Read Full Article Here]({nyt_link})\n[Archive Article Here]({bypass_link})", inline=False)
 
     # Captioning the image
     if no_entry_mitigator(data["og:image:alt"]):
@@ -131,7 +120,7 @@ there_is_a_newsletter_today = False
 
 for href in elems:
     if today in href:
-        briefing_link = f"https://www.nytimes.com/{href}"
+        briefing_link = f"https://www.nytimes.com{href}"
         there_is_a_newsletter_today = True
         break
 
