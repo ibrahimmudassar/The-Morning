@@ -8,8 +8,8 @@ from bs4 import BeautifulSoup
 from colorthief import ColorThief  # Find the dominant color
 from discord_webhook import DiscordEmbed, DiscordWebhook  # Connect to discord
 from environs import Env  # For environment variables
-from playwright.sync_api import sync_playwright
 from requests_html import HTMLSession
+import requests
 
 # Setting up environment variables
 env = Env()
@@ -19,7 +19,7 @@ env.read_env()  # read .env file, if it exists
 # DATABASE_URL = env('DATABASE_URL')
 
 # I use opengraph to simplify the collection process
-
+# Although I'm not using the builtin package for it I can read the metadata that NYT provides
 
 def embed_to_discord(data, nyt_link):
 
@@ -125,15 +125,9 @@ for href in elems:
         break
 
 if there_is_a_newsletter_today:
-    #using playwright
-    with sync_playwright() as playwright:
-        browser = playwright.chromium.launch()
-        page = browser.new_page()
-        page.goto(briefing_link)
 
-        soup = BeautifulSoup(page.content(), 'html.parser')
-        browser.close()
-    
+    bypass_link = f'https://1ft.io/proxy?q={briefing_link}'
+    soup = BeautifulSoup(requests.get(bypass_link).content, 'html.parser')    
     metas = soup.find_all('meta')
 
     data = {}
@@ -149,8 +143,9 @@ if there_is_a_newsletter_today:
                 key = meta.attrs['name']
 
             data[key] = value
+    print(data)
 
-    embed_to_discord(data, briefing_link)
+    # embed_to_discord(data, briefing_link)
 
     # restful_send("The Morning Newsletter," + data["og:title"])
 
