@@ -143,9 +143,8 @@ if there_is_a_newsletter_today:
                 key = meta.attrs['name']
 
             data[key] = value
-    print(data)
 
-    # embed_to_discord(data, briefing_link)
+    embed_to_discord(data, briefing_link)
 
     # restful_send("The Morning Newsletter," + data["og:title"])
 
