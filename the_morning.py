@@ -9,7 +9,6 @@ from colorthief import ColorThief  # Find the dominant color
 from discord_webhook import DiscordEmbed, DiscordWebhook  # Connect to discord
 from environs import Env  # For environment variables
 from requests_html import HTMLSession
-import requests
 
 # Setting up environment variables
 env = Env()
@@ -21,14 +20,15 @@ env.read_env()  # read .env file, if it exists
 # I use opengraph to simplify the collection process
 # Although I'm not using the builtin package for it I can read the metadata that NYT provides
 
+
 def embed_to_discord(data, nyt_link):
 
     # create embed object for webhook
     embed = DiscordEmbed(title=data["og:title"], description=data["og:description"],
                          color=dominant_image_color(data["og:image"]))
-    
+
     bypass_link = f'https://1ft.io/proxy?q={nyt_link}'
-    
+
     embed.add_embed_field(
         name="Link", value=f"[Read Full Article Here]({nyt_link})\n[Archive Article Here]({bypass_link})", inline=False)
 
@@ -110,7 +110,7 @@ session = HTMLSession()
 r = session.get(url)
 
 today = pytz.timezone(
-'US/Eastern').localize(datetime.now()).strftime("%Y/%m/%d")
+    'US/Eastern').localize(datetime.now()).strftime("%Y/%m/%d")
 
 elems = r.html.find('a')  # type: ignore
 elems = [i.attrs['href'] for i in elems if 'href' in i.attrs]
@@ -127,7 +127,7 @@ for href in elems:
 if there_is_a_newsletter_today:
 
     bypass_link = f'https://1ft.io/proxy?q={briefing_link}'
-    soup = BeautifulSoup(requests.get(bypass_link).content, 'html.parser')    
+    soup = BeautifulSoup(requests.get(bypass_link).content, 'html.parser')
     metas = soup.find_all('meta')
 
     data = {}
@@ -136,7 +136,7 @@ if there_is_a_newsletter_today:
             key = ''
             value = meta.attrs['content']
 
-            #one or the other should be there
+            # one or the other should be there
             if 'property' in meta.attrs:
                 key = meta.attrs['property']
             if 'name' in meta.attrs:
