@@ -25,6 +25,7 @@ jobs:
       - name: execute py script # run main.py
         env:
           WEBHOOKS: ${{ secrets.WEBHOOKS }}
+          DB_KEY: ${{ secrets.DB_KEY }}
         run: python the_morning.py
 
       - name: Keepalive Workflow

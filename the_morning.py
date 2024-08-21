@@ -7,7 +7,7 @@ import psycopg2
 import pytz  # Timezone
 import requests  # Download image link
 from bs4 import BeautifulSoup
-from colorthief import ColorThief  # Find the dominant color
+# from colorthief import ColorThief  # Find the dominant color
 from discord_webhook import DiscordEmbed, DiscordWebhook  # Connect to discord
 from environs import Env  # For environment variables
 from requests_html import HTMLSession
@@ -104,13 +104,13 @@ def no_entry_mitigator(x):
 # Takes the image link, downloads it, and then returns a hex color code of the most dominant color
 
 
-def dominant_image_color(image_link):
-    r = requests.get(image_link, allow_redirects=True)
+# def dominant_image_color(image_link):
+#     r = requests.get(image_link, allow_redirects=True)
 
-    color_thief = ColorThief(io.BytesIO(r.content))
-    dominant_color = color_thief.get_color(quality=3)
-    hex = "%02x%02x%02x" % dominant_color
-    return hex
+#     color_thief = ColorThief(io.BytesIO(r.content))
+#     dominant_color = color_thief.get_color(quality=3)
+#     hex = "%02x%02x%02x" % dominant_color
+#     return hex
 
 
 url = "https://www.nytimes.com/series/us-morning-briefing"
