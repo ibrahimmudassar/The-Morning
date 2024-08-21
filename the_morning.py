@@ -6,7 +6,7 @@ from pprint import pprint
 import psycopg2
 import pytz  # Timezone
 import requests  # Download image link
-from bs4 import BeautifulSoup
+# from bs4 import BeautifulSoup
 # from colorthief import ColorThief  # Find the dominant color
 from discord_webhook import DiscordEmbed, DiscordWebhook  # Connect to discord
 from environs import Env  # For environment variables
@@ -118,9 +118,8 @@ url = "https://www.nytimes.com/series/us-morning-briefing"
 session = HTMLSession()
 r = session.get(url)
 
-# today = pytz.timezone(
-#     'US/Eastern').localize(datetime.now()).strftime("%Y/%m/%d")
-today = "2024/08/20"
+today = pytz.timezone(
+    'US/Eastern').localize(datetime.now()).strftime("%Y/%m/%d")
 
 elems = r.html.find("a")  # type: ignore
 elems = [i.attrs["href"] for i in elems if "href" in i.attrs]
