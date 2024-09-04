@@ -126,6 +126,7 @@ elems = [i.attrs["href"] for i in elems if "href" in i.attrs]
 
 there_is_a_newsletter_today = False
 
+briefing_link = ""
 for href in elems:
     if today in href:
         briefing_link = f"https://www.nytimes.com{href}"
