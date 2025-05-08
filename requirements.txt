@@ -1,5 +1,5 @@
 discord_webhook==1.3.1
-environs==9.5.0
+environs
 psycopg2==2.9.9
 pytz==2023.3.post1
 Requests==2.32.3
