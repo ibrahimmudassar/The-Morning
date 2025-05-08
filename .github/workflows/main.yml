@@ -27,5 +27,10 @@ jobs:
           DB_KEY: ${{ secrets.DB_KEY }}
         run: python the_morning.py
 
-      - name: Keepalive Workflow
-        uses: gautamkrishnar/keepalive-workflow@1.1.0
+  workflow-keepalive:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - uses: liskin/gh-workflow-keepalive@v1
