@@ -116,12 +116,13 @@ def no_entry_mitigator(x):
 url = "https://www.nytimes.com/series/us-morning-briefing"
 
 session = HTMLSession()
-r = session.get(url)
-
+r = session.get(url,allow_redirects=True)
+print(r.html)
 today = pytz.timezone(
     'US/Eastern').localize(datetime.now()).strftime("%Y/%m/%d")
 
 elems = r.html.find("a")  # type: ignore
+print(elems)
 elems = [i.attrs["href"] for i in elems if "href" in i.attrs]
 
 there_is_a_newsletter_today = False
@@ -141,7 +142,6 @@ for i in curs.fetchall():
         break
 
 if there_is_a_newsletter_today and not has_link:
-
     send_to_discord(briefing_link)
 
     curs.execute(
