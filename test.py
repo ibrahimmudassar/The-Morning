@@ -91,7 +91,7 @@ def embed_to_discord(data, nyt_link):
 
 
 async def main():
-    driver = await uc.start()
+    driver = await uc.start(headless=True, sandbox=False)
 
     url = "https://www.nytimes.com/series/us-morning-briefing"
     tab = await driver.get(url)
