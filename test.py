@@ -96,7 +96,6 @@ def embed_to_discord(data, nyt_link):
 async def main():
     driver = await zd.start(
         headless=True,
-        sandbox=False,
         browser_args=["--no-sandbox"],
     )
 
