@@ -2,6 +2,7 @@ import asyncio
 import io  # For ColorThief raw file
 import urllib.parse
 from datetime import datetime  # For time
+from sys import platform
 
 import httpx
 
@@ -94,9 +95,16 @@ def embed_to_discord(data, nyt_link):
 
 
 async def main():
+    if platform == "linux":
+        print("I'm on Linux")
+        browser_executable_path = "/usr/bin/google-chrome"
+    else:
+        print("I'm not on Linux")
+        browser_executable_path = None
     driver = await zd.start(
         headless=True,
         browser_args=["--no-sandbox"],
+        browser_executable_path=browser_executable_path,
     )
 
     url = "https://www.nytimes.com/series/us-morning-briefing"
