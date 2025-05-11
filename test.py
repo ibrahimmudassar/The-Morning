@@ -94,7 +94,11 @@ def embed_to_discord(data, nyt_link):
 
 
 async def main():
-    driver = await zd.start(headless=True, sandbox=False)
+    driver = await zd.start(
+        headless=True,
+        sandbox=False,
+        browser_args=["--no-sandbox"],
+    )
 
     url = "https://www.nytimes.com/series/us-morning-briefing"
     tab = await driver.get(url)
