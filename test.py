@@ -4,7 +4,8 @@ import urllib.parse
 from datetime import datetime  # For time
 
 import httpx
-import nodriver as uc
+
+# import nodriver as uc
 import psycopg2
 import pytz  # Timezone
 import zendriver as zd
