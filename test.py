@@ -1,3 +1,4 @@
+import asyncio
 import io  # For ColorThief raw file
 import urllib.parse
 from datetime import datetime  # For time
@@ -6,6 +7,7 @@ import httpx
 import nodriver as uc
 import psycopg2
 import pytz  # Timezone
+import zendriver as zd
 from colorthief import ColorThief  # Find the dominant color
 from discord_webhook import DiscordEmbed, DiscordWebhook  # Connect to discord
 from environs import Env  # For environment variables
@@ -91,7 +93,7 @@ def embed_to_discord(data, nyt_link):
 
 
 async def main():
-    driver = await uc.start(headless=True, sandbox=False)
+    driver = await zd.start(headless=True, sandbox=False)
 
     url = "https://www.nytimes.com/series/us-morning-briefing"
     tab = await driver.get(url)
@@ -125,20 +127,23 @@ async def main():
 
             og_data[key] = value
 
+    await driver.stop()
 
-uc.loop().run_until_complete(main())
 
-curs.execute("SELECT * from nyt")
-has_link = False
-for i in curs.fetchall():
-    if i[0] == briefing_link:
-        has_link = True
-        break
+if __name__ == "__main__":
+    asyncio.run(main())
 
-if there_is_a_newsletter_today and not has_link:
-    embed_to_discord(og_data, briefing_link)
+    curs.execute("SELECT * from nyt")
+    has_link = False
+    for i in curs.fetchall():
+        if i[0] == briefing_link:
+            has_link = True
+            break
 
-    # curs.execute(
-    #     f"INSERT INTO nyt (link, timereceived) VALUES ('{briefing_link}','{datetime.now().isoformat()}')"
-    # )
-    # conn.commit()
+    if there_is_a_newsletter_today and not has_link:
+        embed_to_discord(og_data, briefing_link)
+
+        # curs.execute(
+        #     f"INSERT INTO nyt (link, timereceived) VALUES ('{briefing_link}','{datetime.now().isoformat()}')"
+        # )
+        # conn.commit()
