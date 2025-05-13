@@ -5,8 +5,7 @@ from datetime import datetime  # For time
 from sys import platform
 
 import httpx
-
-# import nodriver as uc
+import nodriver as uc
 import psycopg2
 import pytz  # Timezone
 import zendriver as zd
@@ -95,17 +94,17 @@ def embed_to_discord(data, nyt_link):
 
 
 async def main():
-    if platform == "linux":
-        print("I'm on Linux")
-        browser_executable_path = "/usr/bin/google-chrome"
-    else:
-        print("I'm not on Linux")
-        browser_executable_path = None
-    driver = await zd.start(
-        headless=True,
-        browser_args=["--no-sandbox", "--disable-gpu","disable-dev-shm-usage"],
-        browser_executable_path=browser_executable_path,
-    )
+    # if platform == "linux":
+    #     print("I'm on Linux")
+    #     browser_executable_path = "/usr/bin/google-chrome"
+    # else:
+    #     print("I'm not on Linux")
+    #     browser_executable_path = None
+    config = uc.Config()
+    config.headless = True
+    config.browser_args = (["--no-sandbox", "--disable-gpu", "disable-dev-shm-usage"],)
+
+    driver = await uc.start(config=config)
 
     url = "https://www.nytimes.com/series/us-morning-briefing"
     tab = await driver.get(url)
@@ -143,7 +142,7 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    uc.loop().run_until_complete(main())
 
     curs.execute("SELECT * from nyt")
     has_link = False
