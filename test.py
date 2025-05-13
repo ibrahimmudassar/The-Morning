@@ -102,7 +102,7 @@ async def main():
     #     browser_executable_path = None
     config = uc.Config()
     config.headless = True
-    config.browser_args = (["--no-sandbox", "--disable-gpu", "disable-dev-shm-usage"],)
+    config.browser_args = ["--no-sandbox", "--disable-gpu", "disable-dev-shm-usage"]
 
     driver = await uc.start(config=config)
 
