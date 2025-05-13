@@ -103,7 +103,7 @@ async def main():
         browser_executable_path = None
     driver = await zd.start(
         headless=True,
-        browser_args=["--no-sandbox"],
+        browser_args=["--no-sandbox", "--disable-gpu","disable-dev-shm-usage"],
         browser_executable_path=browser_executable_path,
     )
 
