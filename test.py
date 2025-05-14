@@ -1,5 +1,6 @@
 import asyncio
 import io  # For ColorThief raw file
+import logging
 import urllib.parse
 from datetime import datetime  # For time
 from sys import platform
@@ -12,6 +13,8 @@ import zendriver as zd
 from colorthief import ColorThief  # Find the dominant color
 from discord_webhook import DiscordEmbed, DiscordWebhook  # Connect to discord
 from environs import Env  # For environment variables
+
+logging.basicConfig(level=30)
 
 env = Env()
 env.read_env()  # read .env file, if it exists
@@ -94,15 +97,18 @@ def embed_to_discord(data, nyt_link):
 
 
 async def main():
-    # if platform == "linux":
-    #     print("I'm on Linux")
-    #     browser_executable_path = "/usr/bin/google-chrome"
-    # else:
-    #     print("I'm not on Linux")
-    #     browser_executable_path = None
+
     config = uc.Config()
-    config.headless = True
-    config.sandbox = False
+
+    if platform == "linux":
+        print("I'm on Linux")
+        config.headless = True
+        config.sandbox = False
+    else:
+        print("I'm not on Linux")
+        
+    
+    
     # config.add_argument("--no-sandbox")
     # config.add_argument("--disable-gpu")
     # config.add_argument("--disable-dev-shm-usage")
@@ -123,6 +129,7 @@ async def main():
         if today in link.href:
             briefing_link = f"https://www.nytimes.com{link.href}"
             there_is_a_newsletter_today = True
+            print(briefing_link)
             break
 
     tab = await driver.get(briefing_link)
@@ -140,8 +147,8 @@ async def main():
                 key = meta.attrs["name"]
 
             og_data[key] = value
-
-    await driver.stop()
+    print(og_data)
+    driver.stop()
 
 
 if __name__ == "__main__":
