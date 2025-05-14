@@ -1,20 +1,14 @@
-import asyncio
 import io  # For ColorThief raw file
-import logging
 import urllib.parse
 from datetime import datetime  # For time
-from sys import platform
 
 import httpx
-import nodriver as uc
 import psycopg2
 import pytz  # Timezone
-import zendriver as zd
 from colorthief import ColorThief  # Find the dominant color
 from discord_webhook import DiscordEmbed, DiscordWebhook  # Connect to discord
 from environs import Env  # For environment variables
-
-logging.basicConfig(level=30)
+from playwright.sync_api import sync_playwright
 
 env = Env()
 env.read_env()  # read .env file, if it exists
@@ -64,8 +58,10 @@ def embed_to_discord(data, nyt_link):
     )
 
     # Captioning the image
-    # if no_entry_mitigator(data["og:image"]):
-    #     embed.add_embed_field(name="Caption", value=data["og:image"], inline=False)
+    if no_entry_mitigator(data["twitter:image:alt"]):
+        embed.add_embed_field(
+            name="Caption", value=data["twitter:image:alt"], inline=False
+        )
 
     # Author
     if no_entry_mitigator(data["byl"]):
@@ -96,63 +92,39 @@ def embed_to_discord(data, nyt_link):
         webhook.execute()
 
 
-async def main():
-
-    config = uc.Config()
-
-    if platform == "linux":
-        print("I'm on Linux")
-        config.headless = True
-        config.sandbox = False
-    else:
-        print("I'm not on Linux")
-        
-    
-    
-    # config.add_argument("--no-sandbox")
-    # config.add_argument("--disable-gpu")
-    # config.add_argument("--disable-dev-shm-usage")
-
-    driver = await uc.start(config=config)
+with sync_playwright() as playwright:
+    browser = playwright.chromium.launch()
+    page = browser.new_page()
 
     url = "https://www.nytimes.com/series/us-morning-briefing"
-    tab = await driver.get(url)
+    page.goto(url)
 
     # Get all links from the page
-    links = await tab.select_all("a")
-
-    global briefing_link
-    global there_is_a_newsletter_today
-    global og_data
+    links = page.query_selector_all("a")
 
     for link in links:
-        if today in link.href:
-            briefing_link = f"https://www.nytimes.com{link.href}"
+        if today in link.get_attribute("href"):
+            briefing_link = f"https://www.nytimes.com{link.get_attribute('href')}"
             there_is_a_newsletter_today = True
             print(briefing_link)
             break
+    
+    page.goto(briefing_link)
 
-    tab = await driver.get(briefing_link)
-    metas = await tab.select_all("meta")
-
+    metas = page.query_selector_all("meta")
     for meta in metas:
-        if "content" in meta.attrs:
+        if meta.get_attribute("content"):
             key = ""
-            value = meta.attrs["content"]
+            value = meta.get_attribute("content")
 
             # one or the other should be there
-            if "property" in meta.attrs:
-                key = meta.attrs["property"]
-            if "name" in meta.attrs:
-                key = meta.attrs["name"]
+            if meta.get_attribute("property"):
+                key = meta.get_attribute("property")
+            if meta.get_attribute("name"):
+                key = meta.get_attribute("name")
 
             og_data[key] = value
     print(og_data)
-    driver.stop()
-
-
-if __name__ == "__main__":
-    uc.loop().run_until_complete(main())
 
     curs.execute("SELECT * from nyt")
     has_link = False
