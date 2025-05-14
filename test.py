@@ -106,7 +106,6 @@ with sync_playwright() as playwright:
         if today in link.get_attribute("href"):
             briefing_link = f"https://www.nytimes.com{link.get_attribute('href')}"
             there_is_a_newsletter_today = True
-            print(briefing_link)
             break
     
     page.goto(briefing_link)
@@ -124,7 +123,6 @@ with sync_playwright() as playwright:
                 key = meta.get_attribute("name")
 
             og_data[key] = value
-    print(og_data)
 
     curs.execute("SELECT * from nyt")
     has_link = False
@@ -136,7 +134,7 @@ with sync_playwright() as playwright:
     if there_is_a_newsletter_today and not has_link:
         embed_to_discord(og_data, briefing_link)
 
-        # curs.execute(
-        #     f"INSERT INTO nyt (link, timereceived) VALUES ('{briefing_link}','{datetime.now().isoformat()}')"
-        # )
-        # conn.commit()
+        curs.execute(
+            f"INSERT INTO nyt (link, timereceived) VALUES ('{briefing_link}','{datetime.now().isoformat()}')"
+        )
+        conn.commit()
