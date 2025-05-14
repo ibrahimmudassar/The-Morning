@@ -2,8 +2,7 @@ colorthief
 discord_webhook
 environs
 httpx
-nodriver
-zendriver    
+playwright   
 psycopg2
 psycopg2_binary
 pytz
