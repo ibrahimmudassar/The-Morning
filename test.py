@@ -108,6 +108,9 @@ with sync_playwright() as playwright:
             there_is_a_newsletter_today = True
             break
     
+    if briefing_link == "":
+        exit()
+    
     page.goto(briefing_link)
 
     metas = page.query_selector_all("meta")
