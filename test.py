@@ -58,7 +58,7 @@ def embed_to_discord(data, nyt_link):
     )
 
     # Captioning the image
-    if no_entry_mitigator(data["twitter:image:alt"]):
+    if "twitter:image:alt" in data and no_entry_mitigator(data["twitter:image:alt"]):
         embed.add_embed_field(
             name="Caption", value=data["twitter:image:alt"], inline=False
         )
@@ -107,10 +107,10 @@ with sync_playwright() as playwright:
             briefing_link = f"https://www.nytimes.com{link.get_attribute('href')}"
             there_is_a_newsletter_today = True
             break
-    
+
     if briefing_link == "":
         exit()
-    
+
     page.goto(briefing_link)
 
     metas = page.query_selector_all("meta")
