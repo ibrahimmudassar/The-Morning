@@ -19,6 +19,12 @@ curs = conn.cursor()
 
 today = pytz.timezone("US/Eastern").localize(datetime.now()).strftime("%Y/%m/%d")
 
+curs.execute("SELECT * from nyt")
+for i in curs.fetchall():
+    if today in i[0]:
+        exit()
+
+
 there_is_a_newsletter_today = False
 briefing_link = ""
 og_data = {}
@@ -92,17 +98,6 @@ def embed_to_discord(data, nyt_link):
         webhook.execute()
 
 
-curs.execute("SELECT * from nyt")
-has_link = False
-for i in curs.fetchall():
-    if i[0] == briefing_link:
-        has_link = True
-        break
-
-# If the link is already in the database, exit
-if has_link:
-    exit()
-
 with sync_playwright() as playwright:
     browser = playwright.chromium.launch()
     page = browser.new_page()
@@ -138,7 +133,14 @@ with sync_playwright() as playwright:
 
             og_data[key] = value
 
-    if there_is_a_newsletter_today:
+    curs.execute("SELECT * from nyt")
+    has_link = False
+    for i in curs.fetchall():
+        if i[0] == briefing_link:
+            has_link = True
+            break
+
+    if there_is_a_newsletter_today and not has_link:
         embed_to_discord(og_data, briefing_link)
 
         curs.execute(
