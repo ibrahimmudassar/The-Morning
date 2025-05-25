@@ -92,6 +92,17 @@ def embed_to_discord(data, nyt_link):
         webhook.execute()
 
 
+curs.execute("SELECT * from nyt")
+has_link = False
+for i in curs.fetchall():
+    if i[0] == briefing_link:
+        has_link = True
+        break
+
+# If the link is already in the database, exit
+if has_link:
+    exit()
+
 with sync_playwright() as playwright:
     browser = playwright.chromium.launch()
     page = browser.new_page()
@@ -127,14 +138,7 @@ with sync_playwright() as playwright:
 
             og_data[key] = value
 
-    curs.execute("SELECT * from nyt")
-    has_link = False
-    for i in curs.fetchall():
-        if i[0] == briefing_link:
-            has_link = True
-            break
-
-    if there_is_a_newsletter_today and not has_link:
+    if there_is_a_newsletter_today:
         embed_to_discord(og_data, briefing_link)
 
         curs.execute(
