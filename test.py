@@ -1,4 +1,5 @@
 import io  # For ColorThief raw file
+import time
 import urllib.parse
 from datetime import datetime  # For time
 
@@ -99,7 +100,7 @@ def embed_to_discord(data, nyt_link):
 
 
 with sync_playwright() as playwright:
-    browser = playwright.chromium.launch()
+    browser = playwright.chromium.launch(headless=False)
     page = browser.new_page()
 
     url = "https://www.nytimes.com/series/us-morning-briefing"
@@ -118,6 +119,7 @@ with sync_playwright() as playwright:
         exit()
 
     page.goto(briefing_link)
+    time.sleep(5)
 
     metas = page.query_selector_all("meta")
     for meta in metas:

@@ -31,7 +31,7 @@ jobs:
         env:
           WEBHOOKS: ${{ secrets.WEBHOOKS }}
           DB_KEY: ${{ secrets.DB_KEY }}
-        run: python test.py
+        run: python the_morning.py
 
   workflow-keepalive:
     if: github.event_name == 'schedule'
