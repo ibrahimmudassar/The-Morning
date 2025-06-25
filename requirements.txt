@@ -7,3 +7,4 @@ psycopg2
 psycopg2_binary
 pytz
 requests_html
+lxml-html-clean
