@@ -2,7 +2,7 @@ name: run the_morning.py
 
 on:
   schedule:
-    - cron: "27 * * * *"
+    - cron: "0 */2 * * *"
 
 jobs:
   build:
